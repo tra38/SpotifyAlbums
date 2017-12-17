@@ -215,10 +215,12 @@ class Album extends Component {
   }
 }
 
+const apiUrl = process.env.NODE_ENV === 'production' ? "https://tra38.github.io/SpotifyAlbums" : "http://localhost:3000";
+
 class App extends Component {
   constructor() {
     super();
-    this.state = { accessToken: null, spotifyApi: new SpotifyWebApi(), clientId: "31a3a0db952a408995ab245276c1704a", callbackUri: encodeURIComponent("http://localhost:3000"), value: "", artists: [], selectedArtist: null, location: history.location };
+    this.state = { accessToken: null, spotifyApi: new SpotifyWebApi(), clientId: "31a3a0db952a408995ab245276c1704a", callbackUri: encodeURIComponent(apiUrl), value: "", artists: [], selectedArtist: null, location: history.location };
 
     history.listen(this.handleNavigation)
   }
