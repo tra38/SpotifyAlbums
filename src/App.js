@@ -9,6 +9,11 @@ import Button from 'react-bootstrap/lib/Button';
 import Modal from 'react-bootstrap/lib/Modal';
 import Table from 'react-bootstrap/lib/Table';
 import Media from 'react-bootstrap/lib/Media';
+import Jumbotron from 'react-bootstrap/lib/Jumbotron';
+
+
+// Link compontent
+// import Link from "./Link";
 
 //History.js
 import createHashHistory from 'history/createHashHistory'
@@ -101,22 +106,22 @@ class ArtistDisplay extends Component {
   }
 
   componentDidMount() {
-    if (this.props.artist !== null) {
-      this.checkForUpdates(this.props.artist);
+    if (this.props.artistId !== null) {
+      this.checkForUpdates(this.props.artistId);
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.artist != null) {
-      this.checkForUpdates(nextProps.artist);
+    if (nextProps.artistId != null) {
+      this.checkForUpdates(nextProps.artistId);
     }
   }
 
-  checkForUpdates(currentArtist) {
-    if (currentArtist.id !== this.state.artistId) {
+  checkForUpdates(currentArtistId) {
+    if (currentArtistId !== this.state.artistId) {
       this.setState({ loading: true })
-      this.getAlbums(currentArtist.id);
-      this.setState({ artistId: currentArtist.id });
+      this.getAlbums(currentArtistId);
+      this.setState({ artistId: currentArtistId });
     }
   }
 
@@ -140,9 +145,19 @@ class ArtistDisplay extends Component {
     }
   }
 
+  returnToSearch() {
+    history.push("/")
+  }
+
   render() {
     return (<div>
-      <p>{ this.props.artist == null ? "Hello World" : "The artist id is " + this.props.artist.id + " So here's the albums..."}</p>
+        <Button
+         bsStyle="primary"
+         bsSize="small"
+         onClick={this.returnToSearch}>
+         Back To Search
+       </Button>
+        <h3>{ this.props.artistName ? this.props.artistName + "'s Albums": "Albums"}</h3>
       { this.albumsDisplay(this.state.albums) }
       </div>)
   }
@@ -215,7 +230,7 @@ class Album extends Component {
   }
 }
 
-const apiUrl = process.env.NODE_ENV === 'production' ? "https://tra38.github.io/SpotifyAlbums" : "http://localhost:3000";
+const apiUrl = process.env.NODE_ENV === 'production' ? "https://tra38.github.io/SpotifyAlbums/#/callback" : "http://localhost:3000/#/callback";
 
 class App extends Component {
   constructor() {
@@ -286,47 +301,63 @@ class App extends Component {
   }
 
   searchButtonGenerator() {
-    return (<div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h1 className="App-title">Welcome to React</h1>
-      </header>
-      <p className="App-intro">
-        To get started, edit <code>src/App.js</code> and save to reload.
-      </p>
-      <Autocomplete
-        getItemValue={(item) => item.name}
-        items={this.state.artists}
-        renderItem={(item, isHighlighted) =>
-          <div style={{ background: isHighlighted ? 'lightgray' : 'white' }} key={item.id}>
-            {item.name}
-          </div>
-        }
-        value={this.state.value}
-        onChange={(e) => {
-          this.setState({value: e.target.value})
-          clearTimeout(this.requestTimer)
-          this.requestTimer = this.getArtists(this.state.value)
-        }}
-        onSelect={(selectedInput) => {
-          var selectedArtist = this.findArtist(selectedInput)
-          this.setState({ value: selectedInput, selectedArtist: selectedArtist })
-          history.push("/artist=" + selectedArtist.id)
-        }} />
-      </div>)
+    return (
+      <Jumbotron>
+        <Autocomplete
+          getItemValue={(item) => item.name}
+          items={this.state.artists}
+          renderItem={(item, isHighlighted) =>
+            <div style={{ background: isHighlighted ? 'lightgray' : 'white' }} key={item.id}>
+              {item.name}
+            </div>
+          }
+          value={this.state.value}
+          onChange={(e) => {
+            this.setState({value: e.target.value})
+            clearTimeout(this.requestTimer)
+            this.requestTimer = this.getArtists(this.state.value)
+          }}
+          onSelect={(selectedInput) => {
+            var selectedArtist = this.findArtist(selectedInput)
+            this.setState({ value: selectedInput, selectedArtist: selectedArtist })
+            history.push("/artist?artistId=" + selectedArtist.id + "&artistName=" + encodeURIComponent(selectedArtist.name))
+          }} />
+      </Jumbotron>)
   }
 
-  artistDisplayGenerator() {
-    return (<ArtistDisplay artist={this.state.selectedArtist} spotifyApi={this.state.spotifyApi}/>)
+  artistDisplayGenerator(artistId, artistName) {
+    return (<ArtistDisplay artistId={artistId} artistName={artistName} spotifyApi={this.state.spotifyApi}/>)
+  }
+
+  currentPath(string) {
+    const pathName = this.state.location.pathname
+    const stringLength = string.length
+    return (string === pathName.substring(0, stringLength))
   }
 
   render() {
-    const artist = this.getParameterByName("artist")
-    if (artist != null) {
+    if (this.currentPath("/accessToken")) {
+      this.queryAccessToken();
       return (<div>
-          { this.artistDisplayGenerator() }
+          { this.searchButtonGenerator() }
           </div>)
-    } else {
+    }
+    else if (this.currentPath("/artist")) {
+      const artistId = this.getParameterByName("artistId")
+      const artistName = this.getParameterByName("artistName")
+      if (artistId != null) {
+        return (<div>
+            { this.artistDisplayGenerator(artistId, artistName) }
+            </div>)
+      } else {
+        return (
+          <div>
+          { this.searchButtonGenerator() }
+          </div>
+          )
+      }
+    }
+    else {
       return (
           <div>
           { this.searchButtonGenerator() }
