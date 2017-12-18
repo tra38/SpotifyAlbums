@@ -39,7 +39,7 @@ class ArtistDisplay extends Component {
   }
 
   getAlbums(artistId) {
-    if (artistId == "") {
+    if (artistId === "") {
       this.saveAlbums([])
     } else {
       this.props.spotifyApi.getArtistAlbums(artistId)
@@ -48,7 +48,7 @@ class ArtistDisplay extends Component {
         })
         .then(albumArray => this.saveAlbums(albumArray))
         .catch(error => {
-          if (error.statusText == "Unauthorized") {
+          if (error.statusText === "Unauthorized") {
             this.props.queryAccessToken();
           } else {
             console.log(error)
@@ -81,16 +81,16 @@ class ArtistDisplay extends Component {
   }
 
   albumsDisplay(array) {
-    if (this.state.loading == true) {
+    if (this.state.loading === true) {
       return (<LoadingMessage />)
     }
-    else if (array.length == 0) {
+    else if (array.length === 0) {
       return (<span>No Results.</span>)
     } else {
       return (<Grid>
           {chunks(array, 2).map(
-            (array) => (
-              <AlbumRow spotifyApi={this.props.spotifyApi} array={array} />
+            (array, index) => (
+              <AlbumRow key={index} spotifyApi={this.props.spotifyApi} array={array} />
             )
           )}
         </Grid>)

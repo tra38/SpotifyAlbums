@@ -4,11 +4,9 @@ import * as SpotifyWebApi from './spotify-web-api';
 import Autocomplete from 'react-autocomplete';
 
 // React-Bootstrap Imports
-import Button from 'react-bootstrap/lib/Button';
 import Jumbotron from 'react-bootstrap/lib/Jumbotron';
 
 // Other dependencies
-import LoadingMessage from './LoadingMessage';
 import ArtistDisplay from './ArtistDisplay';
 import { history, apiUrl }  from './defaults';
 
@@ -49,7 +47,7 @@ class App extends Component {
   }
 
   getArtists(name) {
-    if (name == "") {
+    if (name === "") {
       return []
     } else {
       this.state.spotifyApi.searchArtists(name)
@@ -58,7 +56,7 @@ class App extends Component {
         })
         .then(artistArray => this.saveArtists(artistArray))
         .catch(error => {
-          if (error.statusText == "Unauthorized") {
+          if (error.statusText === "Unauthorized") {
             this.acquireAccessToken();
           } else {
             console.log(error)
@@ -72,7 +70,6 @@ class App extends Component {
   }
 
   getParameterByName(name) {
-    name = name.replace(/[\[\]]/g, "\\$&");
     var regex = new RegExp(name + "(=([^&#]*)|&|#|$)")
     var results = regex.exec(window.location.hash)
     if (!results) return null;

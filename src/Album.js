@@ -5,6 +5,7 @@ import Media from 'react-bootstrap/lib/Media';
 import Table from 'react-bootstrap/lib/Table';
 import Modal from 'react-bootstrap/lib/Modal';
 import Button from 'react-bootstrap/lib/Button';
+import Thumbnail from 'react-bootstrap/lib/Thumbnail';
 
 //Other dependencies
 import LoadingMessage from './LoadingMessage';
@@ -31,7 +32,7 @@ const AlbumHeader = ({ album }) => (
     </Media.Left>
     <Media.Body>
       <Media.Heading>By {artistNames(album.artists)}</Media.Heading>
-      <p>This was released in {album.release_date}.</p>
+      <p>This {album.album_type} was released on {album.release_date}.</p>
     </Media.Body>
   </Media>
 )
@@ -83,7 +84,7 @@ class Album extends Component {
   }
 
   acquireAlbumInfo(albumId) {
-    if (albumId == "") {
+    if (albumId === "") {
       console.log("No albumId provided");
     } else {
       this.props.spotifyApi.getAlbum(albumId)
@@ -110,13 +111,15 @@ class Album extends Component {
 
   render() {
     return (<div>
-      <Button
-         bsStyle="primary"
-         bsSize="large"
-         className="line-wrap"
-         onClick={this.open}>
-         { this.props.album.name }
-       </Button>
+        <Thumbnail src={this.props.album.images[0].url} alt="album thumbnail">
+          <Button
+             bsStyle="primary"
+             bsSize="large"
+             className="line-wrap"
+             onClick={this.open}>
+             { this.props.album.name }
+           </Button>
+        </Thumbnail>
         <Modal show={this.state.showModal} onHide={this.close} bsSize="large">
           <Modal.Header closeButton>
               <Modal.Title>{ this.props.album.name }</Modal.Title>
