@@ -10,10 +10,9 @@ import Modal from 'react-bootstrap/lib/Modal';
 import Table from 'react-bootstrap/lib/Table';
 import Media from 'react-bootstrap/lib/Media';
 import Jumbotron from 'react-bootstrap/lib/Jumbotron';
-
-
-// Link compontent
-// import Link from "./Link";
+import Col from 'react-bootstrap/lib/Col';
+import Grid from 'react-bootstrap/lib/Grid';
+import Row from 'react-bootstrap/lib/Row';
 
 //History.js
 import createHashHistory from 'history/createHashHistory'
@@ -24,6 +23,13 @@ function convertTime(milliseconds) {
   var minutes = Math.floor(milliseconds / 60000);
   var seconds = ((milliseconds % 60000) / 1000).toFixed(0);
   return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+}
+
+function chunks(array, chunk_size) {
+  var outputArray = [];
+  while (array.length > 0)
+    outputArray.push(array.splice(0, chunk_size));
+  return outputArray;
 }
 
 const SongsTable = ({ songs }) => (
@@ -37,7 +43,7 @@ const SongsTable = ({ songs }) => (
     <tbody>
       {songs.map(
         (song) => (
-          <tr>
+          <tr key={song.id}>
             <th>{song.name}</th>
             <th>{convertTime(song.duration_ms)}</th>
           </tr>
@@ -78,6 +84,19 @@ const AlbumHeader = ({ album }) => (
   </Media>
 )
 
+const AlbumRow = ({array, spotifyApi}) => (
+  <Row>
+    {array.map(
+      (element) => (
+        <Col md={6} key={element.id}>
+          <Album
+            album={element}
+            spotifyApi={spotifyApi} />
+        </Col>
+      )
+    )}
+  </Row>
+)
 
 class ArtistDisplay extends Component {
   constructor() {
@@ -95,14 +114,16 @@ class ArtistDisplay extends Component {
         })
         .then(albumArray => this.saveAlbums(albumArray))
         .catch(error => {
-          console.log(error)
-        })
+          if (error.statusText == "Unauthorized") {
+            this.props.queryAccessToken();
+          } else {
+            console.log(error)
+          }})
     }
   }
 
   saveAlbums(albumArray) {
     this.setState({albums: albumArray, loading: false})
-    this.updateHistory();
   }
 
   componentDidMount() {
@@ -132,16 +153,13 @@ class ArtistDisplay extends Component {
     else if (array.length == 0) {
       return (<span>No Results.</span>)
     } else {
-      return (<ul>
-          {array.map(
-            (element) => (
-            <li key={element.id}>
-              <Album
-                album={element}
-                spotifyApi={this.props.spotifyApi} />
-            </li>)
+      return (<Grid>
+          {chunks(array, 2).map(
+            (array) => (
+              <AlbumRow spotifyApi={this.props.spotifyApi} array={array} />
+            )
           )}
-        </ul>)
+        </Grid>)
     }
   }
 
@@ -152,7 +170,7 @@ class ArtistDisplay extends Component {
   render() {
     return (<div>
         <Button
-         bsStyle="primary"
+         bsStyle="info"
          bsSize="small"
          onClick={this.returnToSearch}>
          Back To Search
@@ -212,6 +230,7 @@ class Album extends Component {
       <Button
          bsStyle="primary"
          bsSize="large"
+         className="line-wrap"
          onClick={this.open}>
          { this.props.album.name }
        </Button>
@@ -302,7 +321,9 @@ class App extends Component {
 
   searchButtonGenerator() {
     return (
-      <Jumbotron>
+      <Jumbotron className="center">
+        <h2>Find Your Favorite Albums!</h2>
+        <h4>Type in the name of your favorite artist and then select his/her name. You will see a list of albums associated with that artist.</h4>
         <Autocomplete
           getItemValue={(item) => item.name}
           items={this.state.artists}
@@ -326,7 +347,11 @@ class App extends Component {
   }
 
   artistDisplayGenerator(artistId, artistName) {
-    return (<ArtistDisplay artistId={artistId} artistName={artistName} spotifyApi={this.state.spotifyApi}/>)
+    return (<ArtistDisplay
+              artistId={artistId}
+              artistName={artistName}
+              spotifyApi={this.state.spotifyApi}
+              queryAccessToken={this.queryAccessToken} />)
   }
 
   currentPath(string) {
