@@ -1,4 +1,4 @@
-The goal of this project is to build a Single-Page Application that enables users to search for their favorite artists and find information about albums released by these artists.
+The goal of this project is to build a Single-Page Application that enables users to search for information about their favorite albums.
 
 This application uses the Spotify API to gather information about artists. Therefore, you need to log into your Spotify account before you can use the app.
 
