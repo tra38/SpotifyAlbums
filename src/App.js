@@ -168,16 +168,19 @@ class ArtistDisplay extends Component {
   }
 
   render() {
-    return (<div>
-        <Button
-         bsStyle="info"
-         bsSize="small"
-         onClick={this.returnToSearch}>
-         Back To Search
-       </Button>
-        <h3>{ this.props.artistName ? this.props.artistName + "'s Albums": "Albums"}</h3>
+    return (<Grid>
+        <h3>{ this.props.artistName ? this.props.artistName + "'s Albums": "Albums"}
+        </h3>
+         <Button
+          bsStyle="info"
+          bsSize="small"
+          onClick={this.returnToSearch}>
+          Back To Search
+        </Button>
+
+        <hr />
       { this.albumsDisplay(this.state.albums) }
-      </div>)
+      </Grid>)
   }
 }
 
